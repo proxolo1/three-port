@@ -6,11 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>portfolio</title>
         <link rel="icon" type="image/x-icon" href="favicon.ico">
-
+        <link href="https://fonts.googleapis.com/css2?family=Gruppo&display=swap" rel="stylesheet">
 </head>
 
 <body>
     <canvas class="webgl"></canvas>
+    <div class="know">
+        Interaction :
+        <ul>
+             <code> Double tap for full screen</code>
+        </ul>
+        <ul>
+            <code>tap on the text to know more</code>
+
+        </ul>
+    </div>
     <div class="contact">
         <div class="row">
             <div class=" github">
@@ -102,10 +112,20 @@
             </div>
         </div>
     </div>
-    <div class="help">
-
-            <img width="32" height="32" src="https://img.icons8.com/nolan/32/info-squared.png" alt="info-squared"/>
-    </div>
+    <div id="mySidenav" class="sidenav">
+        <a class="closebtn">&times;</a>
+        <div class="content">
+            <span class="title"></span>
+            <p class="body"></p>
+        </div>
+      </div>
+      
+      <!-- Use any element to open the sidenav -->
+      
+      <!-- Add all page content inside this div if you want the side nav to push page content to the right (not used if you only want the sidenav to sit on top of the page -->
+      <div id="main">
+        ...
+      </div>
 </body>
 
 </html>

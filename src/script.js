@@ -3,191 +3,276 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
-// import { ParallaxBarrierEffect } from 'three/examples/jsm/effects/ParallaxBarrierEffect';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-let i = 1, isPaused = false, isRunning = false;
-// Canvas
+
+// Check if the user is using a mobile device
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+// Enable caching in Three.js
+THREE.Cache.enabled = true;
+
+// Clock for animations
+const clock = new THREE.Clock();
+
+// Parameters for configuration
+const parameters = {
+  isPaused: false,
+  isRunning: false,
+  count: 500,
+};
+// Texture
+const textureLoader = new THREE.TextureLoader()
+const rockyColorTexture=textureLoader.load('/texture/GroundDirtRocky002_COL_2K.jpg');
+// const rockyAlphaTexture=textureLoader.load('/texture/GroundDirtRocky002_AO_2K.jpg');
+const rockyAmbientOcclusionTexture=textureLoader.load('/texture/GroundDirtRocky002.jpg');
+const rockyNormalTexture=textureLoader.load('/texture/GroundDirtRocky002_NRM_2K.jpg');
+const rockyDisplacementTexture=textureLoader.load('/texture/GroundDirtRocky002_DISP_2K.jpg')
+// Arrays for text content
+const textSubjectArr = [
+  '',
+  'Developer',
+  'Java Fullstack Developer',
+  'From 15 Sep 21 To Present',
+  '#threejs',
+];
+const textTitleArr = [
+  'H E L L O  : )',
+  'A J A Y K S A N T H O S H',
+  'Unleashing Passion through Programming',
+  'Associate Developer 1 / UST',
+  'T H A N K S >_<',
+];
+const contentArr = [
+  `Three.js-based interactive portfolio website that showcases various 3D elements and text animations. It utilizes 3D geometries, materials, and lighting effects to create an immersive visual experience. The program includes dynamic camera movement, object rotations, and text animations triggered by the camera position. It also incorporates mouse interaction, allowing users to click on the displayed text to open and close a side navigation menu. The program demonstrates the use of Three.js library and its capabilities for creating engaging and interactive web experiences.`,
+  `As a passionate and skilled programmer, you have dedicated yourself to the field for over 1.8 years, focusing on the development of software using technologies such as Spring Boot, Angular, and MySQL. Your primary responsibility involves programming, where you actively contribute to the creation and enhancement of various software applications. Through your commitment and expertise, you strive to deliver high-quality code and contribute to the success of your projects.`,
+  `<div class="container">
+  <div class="skills html">90%</div>
+</div>
+
+<p>CSS</p>
+<div class="container">
+  <div class="skills css">80%</div>
+</div>
+
+<p>JavaScript</p>
+<div class="container">
+  <div class="skills js">65%</div>
+</div>
+
+<p>PHP</p>
+<div class="container">
+  <div class="skills php">60%</div>
+</div>`,
+  ``,
+  "",
+];
+
+// Get the canvas and create the scene
 const canvas = document.querySelector('canvas.webgl');
-
-// Scene
 const scene = new THREE.Scene();
-//font
+scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
-const fontLoader = new FontLoader();
-fontLoader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
-  initFonts(font);
-});
-// Debug
-
-// Sizes
+// Sizes for the renderer
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
 
-// Textures
-const textureLoader = new THREE.TextureLoader();
-const materialOptions = {
-  matcapTexture: textureLoader.load('textures/matcaps/8.png'),
-  cometTexture: textureLoader.load('/symbol_02.png'),
-  standardMaterial: new THREE.MeshStandardMaterial(),
-};
+// DOM elements
+let content = document.querySelector('.content .title');
+let body = document.querySelector('.content .body');
 
-// Camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
-camera.position.set(0, 0, 15);
+// Variables for Three.js objects and materials
+let font,
+  camera,
+  renderer,
+  controls,
+  rectAreaLight,
+  icosahedronGroup,
+  colorArr,
+  textGroup,
+  i = 0,
+  raycaster,
+  standardMaterial,
+  currentIntersect;
 
-// Renderer
-const renderer = new THREE.WebGLRenderer({ canvas });
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// Mouse position
+const mouse = new THREE.Vector2();
 
-// Controls
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;
-controls.enableZoom = true;
-controls.enableRotate = true;
+init();
+animate();
 
-// Lights
-const rectAreaLight = new THREE.RectAreaLight(0xb60707, 1, 100, 20);
-rectAreaLight.position.z = 10;
-scene.add(rectAreaLight);
+function init() {
+  // Create the camera
+  camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
+  camera.position.set(0, 0, isMobile ? 20 : 10);
 
-// const pointLight = new THREE.PointLight(0x5c5c5c, 0.8, 10, 1);
-// pointLight.position.z = -2;
-// pointLight.position.x = 5;
-// scene.add(pointLight);
+  // Create the renderer
+  renderer = new THREE.WebGLRenderer({ canvas });
+  renderer.setSize(sizes.width, sizes.height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  //mesh standard material
+  standardMaterial = new THREE.MeshStandardMaterial();
+  // Create the controls
+  controls = new OrbitControls(camera, canvas);
+  controls.enableDamping = false;
+  controls.enableZoom = false;
+  controls.enableRotate = false;
 
-// Donuts
-const donutArr = [];
-const donutGeometry = new THREE.IcosahedronGeometry(1, 0);
-const donutCount = 1000;
+  // Create the rect area light
+  rectAreaLight = new THREE.RectAreaLight(0xb60707, 1, 100, 20);
+  rectAreaLight.position.z = 10;
+  scene.add(rectAreaLight);
+  // Create the icosahedron group
+  icosahedronGroup = new THREE.Group();
+  scene.add(icosahedronGroup);
 
+  const icosahedronGeometry = new THREE.IcosahedronGeometry(1,0)
+  for (let i = 0; i < parameters.count; i++) {
+    const icosahedron = new THREE.Mesh(icosahedronGeometry, standardMaterial);
+    icosahedron.position.set(
+      (Math.random() - 0.5) * 70,
+      (Math.random() - 0.5) * 70,
+      (Math.random() - 0.5) * 70
+    );
+    icosahedron.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+    const scale = Math.random() * 0.3;
+    icosahedron.scale.set(scale, scale, scale);
+    icosahedronGroup.add(icosahedron);
+  }
+  raycaster = new THREE.Raycaster();
 
-for (let i = 0; i < donutCount; i++) {
-  const donut = new THREE.Mesh(donutGeometry, materialOptions.standardMaterial);
-  donut.position.set(
-    (Math.random() - 0.5) * 50,
-    (Math.random() - 0.5) * 50,
-    (Math.random() - 0.5) * 50
-  );
-  donut.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
-  const scale = Math.random() / 2;
-  donut.scale.set(scale, scale, scale);
-  donutArr.push(donut);
-  scene.add(donut);
+  const rayOrigin = new THREE.Vector3(-3, 0, 0);
+  const rayDirection = new THREE.Vector3(10, 0, 0);
+  rayDirection.normalize();
+  textGroup = new THREE.Group();
+  colorArr = [0xb60707, 0x07b6a2, 0x4db607, 0xb66d07, 0xff00f7];
+  loadFont();
 }
 
-// Text
-
-function initFonts(font) {
-
-}
-
-const textGroup = new THREE.Group();
-const textTitleArr = [`H E L L O  : )`, `A J A Y K S A N T H O S H`, `Unleashing Passion through Programming`, `Associate Software Developer / UST, Trivandrum`, `T H A N K S >_< `];
-const textSubjectArr = [``, `Developer`, `js | java | html | css | mysql`, `From 15 Sep 21 To Present`, '#threejs'];
-const colorArr = [0xb60707, 0x07b6a2, 0x4db607, 0xb66d07, 0xff00f7];
-// createText(textTitleArr[0], textSubjectArr[0]);
-
-function createText(title, subject) {
-  fontLoader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
-    const textGeometry = new TextGeometry(title, {
-      font,
-      size: 2,
-      height: 0.2,
-      curveSegments: 12,
-      bevelEnabled: true,
-      bevelThickness: 0.03,
-      bevelSize: 0.02,
-      bevelOffset: 0,
-      bevelSegments: 5,
-    });
-    textGeometry.center();
-    const text = new THREE.Mesh(textGeometry, materialOptions.standardMaterial);
-    text.scale.set(0.3, 0.3, 1);
-
-    const textGeometryDeveloper = new TextGeometry(subject, {
-      font,
-      size: 0.5,
-      height: 0.2,
-      curveSegments: 12,
-      bevelEnabled: true,
-      bevelThickness: 0.03,
-      bevelSize: 0.02,
-      bevelOffset: 0,
-      bevelSegments: 5,
-    });
-    const developerText = new THREE.Mesh(textGeometryDeveloper, materialOptions.standardMaterial);
-    textGeometryDeveloper.center();
-    developerText.position.set(3.5, -1.5, 0);
-
-    textGroup.clear();
-    textGroup.add(text);
-    textGroup.add(developerText);
-    scene.add(textGroup);
-    textGeometry.dispose();
-    textGeometryDeveloper.dispose();
-    materialOptions.standardMaterial.dispose();
+function loadFont() {
+  const loader = new FontLoader();
+  loader.load('/fonts/helvetiker_regular.typeface.json', (_font) => {
+    font = _font;
+    createText(textTitleArr[i], textSubjectArr[i], contentArr[i]);
   });
 }
 
-// Event listeners
-document.addEventListener('dblclick', () => {
-  if (!document.webkitFullscreenElement) {
-    if (canvas.requestFullScreen) {
-      canvas.requestFullScreen();
-    } else if (canvas.webkitRequestFullScreen) {
-      canvas.webkitRequestFullScreen();
-    } else if (canvas.mozRequestFullScreen) {
-      canvas.mozRequestFullScreen();
+function createText(title, subject, contentArgs) {
+  textGroup.clear();
+
+  // Create the plane
+  const planeGeometry = new THREE.PlaneGeometry(15, 2);
+  const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0 });
+  const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+  textGroup.add(planeMesh);
+
+  // Set the title and content
+  content.innerHTML = title;
+  body.innerHTML = contentArgs;
+
+  // Create the title text
+  const textGeometry = new TextGeometry(title, {
+    font,
+    size: 2,
+    height: 0.2,
+    curveSegments: 12,
+    bevelEnabled: false,
+    bevelThickness: 0.03,
+    bevelSize: 0.02,
+    bevelOffset: 0,
+    bevelSegments: 5,
+  });
+  textGeometry.center();
+  const text = new THREE.Mesh(textGeometry, standardMaterial);
+  text.scale.set(0.3, 0.3, 1);
+
+  // Create the subject text
+  const textGeometryDeveloper = new TextGeometry(subject, {
+    font,
+    size: 0.5,
+    height: 0.2,
+    curveSegments: 12,
+    bevelEnabled: false,
+    bevelThickness: 0.03,
+    bevelSize: 0.02,
+    bevelOffset: 0,
+    bevelSegments: 5,
+  });
+  textGeometryDeveloper.center();
+  const developerText = new THREE.Mesh(textGeometryDeveloper, standardMaterial);
+  developerText.position.set(3.5, -1.5, 0);
+
+  textGroup.add(text);
+  textGroup.add(developerText);
+  scene.add(textGroup);
+
+  textGeometry.dispose();
+  textGeometryDeveloper.dispose();
+}
+
+function animate() {
+
+  
+  controls.update();
+  if(!parameters.isPaused){
+  // Rotate and move the icosahedron objects
+  icosahedronGroup.children.forEach((icosahedron) => {
+    icosahedron.rotation.y += 0.01;
+    icosahedron.rotation.x += 0.01;
+    icosahedron.position.z += 0.02;
+    
+    if (icosahedron.position.z > 15) {
+      icosahedron.position.z = (Math.random() * -1) * 50;
     }
-  } else {
-    document.webkitExitFullscreen();
+  });
+  
+  const elapsedTime = clock.getElapsedTime();
+    // Animate the camera position
+    camera.position.y = Math.sin(elapsedTime * 0.2) * 10;
+    camera.position.x = Math.tan(elapsedTime * 0.4);
+
+    // Check camera position for text updates
+    if (camera.position.x > 150 && !parameters.isRunning) {
+      createText(textTitleArr[i + 1], textSubjectArr[i + 1], contentArr[i + 1]);
+      parameters.isRunning = true;
+      rectAreaLight.color.set(colorArr[i + 1]);
+      if (++i === 4) {
+        i = 0;
+      }
+    } else if (camera.position.x < 0) {
+      parameters.isRunning = false;
+    }
   }
-});
+    renderer.render(scene, camera);
+    raycaster.setFromCamera(mouse, camera);
 
-var holdTimeout;
-var holdDuration = 500; // Define the duration (in milliseconds) for a "hold" event
+    const objectsToTest = textGroup.children;
+    const intersects = raycaster.intersectObjects(objectsToTest);
 
-// Function to handle the "hold" event
-function handleHold() {
-  // Perform actions for the "hold" event
-  isPaused = true;
+    if (intersects.length) {
+      if (!currentIntersect) {
+        console.log('mouse enter');
+        document.body.style.cursor = 'pointer';
+       openNav();
+      }
+      currentIntersect = intersects[0];
+    } else {
+      if (currentIntersect) {
+        console.log('mouse leave');
+        document.body.style.cursor = 'default';
+      closeNav();
+      }
+      currentIntersect = null;
+    }
+  requestAnimationFrame(animate);
 }
 
-// Function to start the hold timer
-function startHoldTimer() {
-  holdTimeout = setTimeout(function () {
-    // handleHold();
-  }, holdDuration);
-
-}
-
-// Function to clear the hold timer
-function clearHoldTimer() {
-
-  if (isPaused) {
-    isPaused = false;
-    animate();
-  }
-
-
-
-  clearTimeout(holdTimeout);
-}
-
-// Add event listeners for mouse/touch events
-document.addEventListener('mousedown', startHoldTimer);
-document.addEventListener('mouseup', clearHoldTimer);
-document.addEventListener('touchstart', startHoldTimer);
-document.addEventListener('touchend', clearHoldTimer);
-
+document.addEventListener('dblclick', fullscreen);
 
 window.addEventListener('resize', () => {
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
-
+  console.log(sizes);
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
@@ -195,44 +280,31 @@ window.addEventListener('resize', () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-// Animation
-const clock = new THREE.Clock();
-
-function animate() {
-  const elapsedTime = clock.getElapsedTime();
-
-  controls.update();
+window.addEventListener('mousemove', (event) => {
+  mouse.x = event.clientX / sizes.width * 2 - 1;
+  mouse.y = - (event.clientY / sizes.height) * 2 + 1;
+});
 
 
-  donutArr.forEach((donut) => {
-
-    donut.rotation.y += 0.01;
-    donut.rotation.x += 0.01;
-    donut.position.z += 0.02;
-
-    if (donut.position.z > 15) {
-      donut.position.z = (Math.random() * -1) * 50;
-    }
-  });
-
-  camera.position.y = Math.sin(elapsedTime / 3) * 10;
-  camera.position.x = Math.tan(elapsedTime / 3);
-  // camera.position.z = - Math.sin(elapsedTime / 4) * 8
-  if (camera.position.x > 150 && !isRunning) {
-    createText(textTitleArr[i], textSubjectArr[i]);
-    isRunning = true;
-    rectAreaLight.color.set(colorArr[i]);
-    // particleMaterial.color.set(colorArr[i])
-    if (++i == 5) {
-      i = 0;
-    }
-  } else if (camera.position.x < 0) {
-    isRunning = false;
-  }
-  renderer.render(scene, camera)
-  if (!isPaused) {
-    requestAnimationFrame(animate);
-  }
+function openNav() {
+  document.getElementById('mySidenav').style.width = '300px';
+  parameters.isPaused = true;
 }
 
-animate();
+/* Set the width of the side navigation to 0 and the left margin of the page content to 0 */
+function closeNav() {
+  document.getElementById('mySidenav').style.width = '0';
+  parameters.isPaused = false;
+}
+
+function fullscreen() {
+  if (canvas.requestFullscreen) {
+    canvas.requestFullscreen();
+  } else if (canvas.mozRequestFullScreen) {
+    canvas.mozRequestFullScreen();
+  } else if (canvas.webkitRequestFullscreen) {
+    canvas.webkitRequestFullscreen();
+  } else if (canvas.msRequestFullscreen) {
+    canvas.msRequestFullscreen();
+  }
+}
