@@ -3,6 +3,21 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc } from "firebase/firestore";
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDqeIeHdTodMCizOlA6uAxn7S0qAT7h3Ws",
+  authDomain: "proxoloo.firebaseapp.com",
+  projectId: "proxoloo",
+  storageBucket: "proxoloo.appspot.com",
+  messagingSenderId: "256159945638",
+  appId: "1:256159945638:web:45388f7e0073d3cf523567",
+  measurementId: "G-TTMHVYJPXE"
+};
 
 // Check if the user is using a mobile device
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -21,49 +36,80 @@ const parameters = {
 };
 // Texture
 const textureLoader = new THREE.TextureLoader()
-const rockyColorTexture=textureLoader.load('/texture/GroundDirtRocky002_COL_2K.jpg');
+const rockyColorTexture = textureLoader.load('/texture/GroundDirtRocky002_COL_2K.jpg');
 // const rockyAlphaTexture=textureLoader.load('/texture/GroundDirtRocky002_AO_2K.jpg');
-const rockyAmbientOcclusionTexture=textureLoader.load('/texture/GroundDirtRocky002.jpg');
-const rockyNormalTexture=textureLoader.load('/texture/GroundDirtRocky002_NRM_2K.jpg');
-const rockyDisplacementTexture=textureLoader.load('/texture/GroundDirtRocky002_DISP_2K.jpg')
+const rockyAmbientOcclusionTexture = textureLoader.load('/texture/GroundDirtRocky002.jpg');
+const rockyNormalTexture = textureLoader.load('/texture/GroundDirtRocky002_NRM_2K.jpg');
+const rockyDisplacementTexture = textureLoader.load('/texture/GroundDirtRocky002_DISP_2K.jpg')
 // Arrays for text content
 const textSubjectArr = [
   '',
   'Developer',
   'Java Fullstack Developer',
-  'From 15 Sep 21 To Present',
-  '#threejs',
+  '15 Sep 21 To Present',
+  'Thanks',
 ];
 const textTitleArr = [
   'H E L L O  : )',
   'A J A Y K S A N T H O S H',
   'Unleashing Passion through Programming',
   'Associate Developer 1 / UST',
-  'T H A N K S >_<',
+  'H I R E M E >_<',
 ];
 const contentArr = [
   `Three.js-based interactive portfolio website that showcases various 3D elements and text animations. It utilizes 3D geometries, materials, and lighting effects to create an immersive visual experience. The program includes dynamic camera movement, object rotations, and text animations triggered by the camera position. It also incorporates mouse interaction, allowing users to click on the displayed text to open and close a side navigation menu. The program demonstrates the use of Three.js library and its capabilities for creating engaging and interactive web experiences.`,
   `As a passionate and skilled programmer, you have dedicated yourself to the field for over 1.8 years, focusing on the development of software using technologies such as Spring Boot, Angular, and MySQL. Your primary responsibility involves programming, where you actively contribute to the creation and enhancement of various software applications. Through your commitment and expertise, you strive to deliver high-quality code and contribute to the success of your projects.`,
-  `<div class="container">
+  `<p>HTML</p><div class="container">
+  
   <div class="skills html">90%</div>
 </div>
 
 <p>CSS</p>
 <div class="container">
-  <div class="skills css">80%</div>
+  <div class="skills css">90%</div>
 </div>
 
 <p>JavaScript</p>
 <div class="container">
-  <div class="skills js">65%</div>
+  <div class="skills js">80%</div>
 </div>
 
-<p>PHP</p>
+<p>Java</p>
 <div class="container">
-  <div class="skills php">60%</div>
-</div>`,
-  ``,
-  "",
+  <div class="skills java">78%</div>
+</div>
+
+<p>Spring boot</p>
+<div class="container">
+  <div class="skills spring">70%</div>
+</div>
+<p>Angular</p>
+<div class="container">
+  <div class="skills angular">80%</div>
+</div>
+<p>Mysql</p>
+<div class="container">
+  <div class="skills mysql">70%</div>
+</div>
+<p>Mongo Db</p>
+<div class="container">
+  <div class="skills mongo">30%</div>
+</div>
+<p>Bootstrap</p>
+<div class="container">
+  <div class="skills bootstrap">90%</div>
+</div>
+<p>Aws</p>
+<div class="container">
+  <div class="skills aws">20%</div>
+</div>
+<p>Firebase</p>
+<div class="container">
+  <div class="skills firebase">70%</div>
+</div>
+`,
+  `pending....`,
+  "pending....",
 ];
 
 // Get the canvas and create the scene
@@ -97,7 +143,10 @@ let font,
 
 // Mouse position
 const mouse = new THREE.Vector2();
-
+// Usage
+const textToSave = 'This is the text I want to save';
+const apiKey = '1T8Fih1D8qTqMpLA4e6xzbsnjto2J-ow'; // You'll need to sign up for a free Pastebin API key
+annonymous();
 init();
 animate();
 
@@ -126,7 +175,7 @@ function init() {
   icosahedronGroup = new THREE.Group();
   scene.add(icosahedronGroup);
 
-  const icosahedronGeometry = new THREE.IcosahedronGeometry(1,0)
+  const icosahedronGeometry = new THREE.IcosahedronGeometry(1, 0)
   for (let i = 0; i < parameters.count; i++) {
     const icosahedron = new THREE.Mesh(icosahedronGeometry, standardMaterial);
     icosahedron.position.set(
@@ -151,7 +200,7 @@ function init() {
 
 function loadFont() {
   const loader = new FontLoader();
-  loader.load('/fonts/helvetiker_regular.typeface.json', (_font) => {
+  loader.load('/fonts/Gruppo_Regular.json', (_font) => {
     font = _font;
     createText(textTitleArr[i], textSubjectArr[i], contentArr[i]);
   });
@@ -212,23 +261,23 @@ function createText(title, subject, contentArgs) {
 
 function animate() {
 
-  
+
   controls.update();
-  if(!parameters.isPaused){
-  // Rotate and move the icosahedron objects
-  icosahedronGroup.children.forEach((icosahedron) => {
-    icosahedron.rotation.y += 0.01;
-    icosahedron.rotation.x += 0.01;
-    icosahedron.position.z += 0.02;
-    
-    if (icosahedron.position.z > 15) {
-      icosahedron.position.z = (Math.random() * -1) * 50;
-    }
-  });
-  
-  const elapsedTime = clock.getElapsedTime();
+  if (!parameters.isPaused) {
+    // Rotate and move the icosahedron objects
+    icosahedronGroup.children.forEach((icosahedron) => {
+      icosahedron.rotation.y += 0.01;
+      icosahedron.rotation.x += 0.01;
+      icosahedron.position.z += 0.02;
+
+      if (icosahedron.position.z > 15) {
+        icosahedron.position.z = (Math.random() * -1) * 50;
+      }
+    });
+
+    const elapsedTime = clock.getElapsedTime();
     // Animate the camera position
-    camera.position.y = Math.sin(elapsedTime * 0.2) * 10;
+    camera.position.y = Math.sin(elapsedTime * 0.2) * 2;
     camera.position.x = Math.tan(elapsedTime * 0.4);
 
     // Check camera position for text updates
@@ -243,36 +292,33 @@ function animate() {
       parameters.isRunning = false;
     }
   }
-    renderer.render(scene, camera);
-    raycaster.setFromCamera(mouse, camera);
+  renderer.render(scene, camera);
+  raycaster.setFromCamera(mouse, camera);
 
-    const objectsToTest = textGroup.children;
-    const intersects = raycaster.intersectObjects(objectsToTest);
+  const objectsToTest = textGroup.children;
+  const intersects = raycaster.intersectObjects(objectsToTest);
 
-    if (intersects.length) {
-      if (!currentIntersect) {
-        console.log('mouse enter');
-        document.body.style.cursor = 'pointer';
-       openNav();
-      }
-      currentIntersect = intersects[0];
-    } else {
-      if (currentIntersect) {
-        console.log('mouse leave');
-        document.body.style.cursor = 'default';
-      closeNav();
-      }
-      currentIntersect = null;
+  if (intersects.length) {
+    if (!currentIntersect) {
+      document.body.style.cursor = 'pointer';
+      openNav();
     }
+    currentIntersect = intersects[0];
+  } else {
+    if (currentIntersect) {
+      document.body.style.cursor = 'default';
+      closeNav();
+    }
+    currentIntersect = null;
+  }
   requestAnimationFrame(animate);
 }
 
-document.addEventListener('dblclick', fullscreen);
+// document.addEventListener('dblclick', fullscreen);
 
 window.addEventListener('resize', () => {
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
-  console.log(sizes);
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
@@ -281,6 +327,7 @@ window.addEventListener('resize', () => {
 });
 
 window.addEventListener('mousemove', (event) => {
+  event.preventDefault()
   mouse.x = event.clientX / sizes.width * 2 - 1;
   mouse.y = - (event.clientY / sizes.height) * 2 + 1;
 });
@@ -307,4 +354,29 @@ function fullscreen() {
   } else if (canvas.msRequestFullscreen) {
     canvas.msRequestFullscreen();
   }
+}
+
+
+function annonymous() {
+  fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      getDocs(collection(db, 'users')).then(doc => {
+        doc.forEach(doc => {
+          if (!(data.ip == doc.data().ipAddress)) {
+            addDoc(collection(db, "users"), {
+              name: navigator.userAgent,
+              ipAddress: data.ip
+            });
+          }
+
+        })
+      })
+
+    })
+    .catch(error => {
+      console.error('Error retrieving IP address:', error);
+    });
 }
