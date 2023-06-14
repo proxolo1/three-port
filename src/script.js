@@ -1,12 +1,10 @@
 import './style.css';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from "firebase/firestore";
 import { collection, addDoc, getDocs, doc } from "firebase/firestore";
-
+import SceneInitializer from './init';
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
 const firebaseConfig = {
@@ -21,26 +19,15 @@ const firebaseConfig = {
 
 // Check if the user is using a mobile device
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
 // Enable caching in Three.js
-THREE.Cache.enabled = true;
 
-// Clock for animations
-const clock = new THREE.Clock();
+
 
 // Parameters for configuration
 const parameters = {
   isPaused: false,
-  isRunning: false,
-  count: 500,
+  count: 500
 };
-// Texture
-const textureLoader = new THREE.TextureLoader()
-const rockyColorTexture = textureLoader.load('/texture/GroundDirtRocky002_COL_2K.jpg');
-// const rockyAlphaTexture=textureLoader.load('/texture/GroundDirtRocky002_AO_2K.jpg');
-const rockyAmbientOcclusionTexture = textureLoader.load('/texture/GroundDirtRocky002.jpg');
-const rockyNormalTexture = textureLoader.load('/texture/GroundDirtRocky002_NRM_2K.jpg');
-const rockyDisplacementTexture = textureLoader.load('/texture/GroundDirtRocky002_DISP_2K.jpg')
 // Arrays for text content
 const textSubjectArr = [
   '',
@@ -112,11 +99,7 @@ const contentArr = [
   "pending....",
 ];
 
-// Get the canvas and create the scene
 const canvas = document.querySelector('canvas.webgl');
-const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x000000, 0.0008);
-
 // Sizes for the renderer
 const sizes = {
   width: window.innerWidth,
@@ -129,71 +112,31 @@ let body = document.querySelector('.content .body');
 
 // Variables for Three.js objects and materials
 let font,
-  camera,
-  renderer,
-  controls,
-  rectAreaLight,
-  icosahedronGroup,
   colorArr,
-  textGroup,
   i = 0,
-  raycaster,
-  standardMaterial,
   currentIntersect;
 
-// Mouse position
-const mouse = new THREE.Vector2();
-// Usage
-const textToSave = 'This is the text I want to save';
-const apiKey = '1T8Fih1D8qTqMpLA4e6xzbsnjto2J-ow'; // You'll need to sign up for a free Pastebin API key
-annonymous();
+// Clock for animations
+const sceneInitializer = new SceneInitializer(sizes, canvas);
+const clock = new THREE.Clock();
 init();
 animate();
-
 function init() {
   // Create the camera
-  camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
-  camera.position.set(0, 0, isMobile ? 20 : 10);
+  // camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
+  sceneInitializer.setCameraPosition(0, 0, isMobile ? 20 : 10);
 
-  // Create the renderer
-  renderer = new THREE.WebGLRenderer({ canvas });
-  renderer.setSize(sizes.width, sizes.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   //mesh standard material
-  standardMaterial = new THREE.MeshStandardMaterial();
-  // Create the controls
-  controls = new OrbitControls(camera, canvas);
-  controls.enableDamping = false;
-  controls.enableZoom = false;
-  controls.enableRotate = false;
 
-  // Create the rect area light
-  rectAreaLight = new THREE.RectAreaLight(0xb60707, 1, 100, 20);
-  rectAreaLight.position.z = 10;
-  scene.add(rectAreaLight);
+  sceneInitializer.addSceneRectAreaLight();
   // Create the icosahedron group
-  icosahedronGroup = new THREE.Group();
-  scene.add(icosahedronGroup);
+  sceneInitializer.addIcosahedronGroupScene();
 
-  const icosahedronGeometry = new THREE.IcosahedronGeometry(1, 0)
   for (let i = 0; i < parameters.count; i++) {
-    const icosahedron = new THREE.Mesh(icosahedronGeometry, standardMaterial);
-    icosahedron.position.set(
-      (Math.random() - 0.5) * 70,
-      (Math.random() - 0.5) * 70,
-      (Math.random() - 0.5) * 70
-    );
-    icosahedron.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
-    const scale = Math.random() * 0.3;
-    icosahedron.scale.set(scale, scale, scale);
-    icosahedronGroup.add(icosahedron);
+    sceneInitializer.createIcosahedrons();
   }
-  raycaster = new THREE.Raycaster();
 
-  const rayOrigin = new THREE.Vector3(-3, 0, 0);
-  const rayDirection = new THREE.Vector3(10, 0, 0);
-  rayDirection.normalize();
-  textGroup = new THREE.Group();
+
   colorArr = [0xb60707, 0x07b6a2, 0x4db607, 0xb66d07, 0xff00f7];
   loadFont();
 }
@@ -207,20 +150,7 @@ function loadFont() {
 }
 
 function createText(title, subject, contentArgs) {
-  textGroup.clear();
-
-  // Create the plane
-  const planeGeometry = new THREE.PlaneGeometry(15, 2);
-  const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0 });
-  const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
-  textGroup.add(planeMesh);
-
-  // Set the title and content
-  content.innerHTML = title;
-  body.innerHTML = contentArgs;
-
-  // Create the title text
-  const textGeometry = new TextGeometry(title, {
+  const textOptions = {
     font,
     size: 2,
     height: 0.2,
@@ -230,73 +160,40 @@ function createText(title, subject, contentArgs) {
     bevelSize: 0.02,
     bevelOffset: 0,
     bevelSegments: 5,
-  });
-  textGeometry.center();
-  const text = new THREE.Mesh(textGeometry, standardMaterial);
-  text.scale.set(0.3, 0.3, 1);
-
-  // Create the subject text
-  const textGeometryDeveloper = new TextGeometry(subject, {
-    font,
-    size: 0.5,
-    height: 0.2,
-    curveSegments: 12,
-    bevelEnabled: false,
-    bevelThickness: 0.03,
-    bevelSize: 0.02,
-    bevelOffset: 0,
-    bevelSegments: 5,
-  });
-  textGeometryDeveloper.center();
-  const developerText = new THREE.Mesh(textGeometryDeveloper, standardMaterial);
-  developerText.position.set(3.5, -1.5, 0);
-
-  textGroup.add(text);
-  textGroup.add(developerText);
-  scene.add(textGroup);
-
-  textGeometry.dispose();
-  textGeometryDeveloper.dispose();
+  }
+  sceneInitializer.clearTexts();
+  content.innerHTML = title;
+  body.innerHTML = contentArgs;
+  sceneInitializer.addTextGroup(title, subject, textOptions);
+  sceneInitializer.addTextGroupScene();
 }
 
 function animate() {
 
 
-  controls.update();
+  sceneInitializer.updateController();
   if (!parameters.isPaused) {
     // Rotate and move the icosahedron objects
-    icosahedronGroup.children.forEach((icosahedron) => {
-      icosahedron.rotation.y += 0.01;
-      icosahedron.rotation.x += 0.01;
-      icosahedron.position.z += 0.02;
-
-      if (icosahedron.position.z > 15) {
-        icosahedron.position.z = (Math.random() * -1) * 50;
-      }
-    });
+    sceneInitializer.updateIcosahedronGroup();
 
     const elapsedTime = clock.getElapsedTime();
     // Animate the camera position
-    camera.position.y = Math.sin(elapsedTime * 0.2) * 2;
-    camera.position.x = Math.tan(elapsedTime * 0.4);
-
+    sceneInitializer.setCameraXPosition(elapsedTime);
     // Check camera position for text updates
-    if (camera.position.x > 150 && !parameters.isRunning) {
+    if (sceneInitializer.getCameraXPosition() > 150) {
       createText(textTitleArr[i + 1], textSubjectArr[i + 1], contentArr[i + 1]);
       parameters.isRunning = true;
-      rectAreaLight.color.set(colorArr[i + 1]);
+      sceneInitializer.addRectAreaLightColor(colorArr[i + 1]);
       if (++i === 4) {
         i = 0;
       }
-    } else if (camera.position.x < 0) {
-      parameters.isRunning = false;
     }
-  }
-  renderer.render(scene, camera);
-  raycaster.setFromCamera(mouse, camera);
 
-  const objectsToTest = textGroup.children;
-  const intersects = raycaster.intersectObjects(objectsToTest);
+  }
+  sceneInitializer.render();
+  sceneInitializer.interactRayCasterWithMouse();
+  const objectsToTest = sceneInitializer.textGroup.children;
+  const intersects = sceneInitializer.intersectObjects(objectsToTest);
 
   if (intersects.length) {
     if (!currentIntersect) {
@@ -319,17 +216,13 @@ function animate() {
 window.addEventListener('resize', () => {
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
-  camera.aspect = sizes.width / sizes.height;
-  camera.updateProjectionMatrix();
-
-  renderer.setSize(sizes.width, sizes.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  sceneInitializer.updateCameraAspect(sizes);
+  sceneInitializer.renderSize(sizes);
 });
 
 window.addEventListener('mousemove', (event) => {
   event.preventDefault()
-  mouse.x = event.clientX / sizes.width * 2 - 1;
-  mouse.y = - (event.clientY / sizes.height) * 2 + 1;
+  sceneInitializer.setMouse(event, sizes);
 });
 
 
@@ -342,18 +235,6 @@ function openNav() {
 function closeNav() {
   document.getElementById('mySidenav').style.width = '0';
   parameters.isPaused = false;
-}
-
-function fullscreen() {
-  if (canvas.requestFullscreen) {
-    canvas.requestFullscreen();
-  } else if (canvas.mozRequestFullScreen) {
-    canvas.mozRequestFullScreen();
-  } else if (canvas.webkitRequestFullscreen) {
-    canvas.webkitRequestFullscreen();
-  } else if (canvas.msRequestFullscreen) {
-    canvas.msRequestFullscreen();
-  }
 }
 
 
