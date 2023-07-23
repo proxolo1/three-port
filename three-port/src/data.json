@@ -1,0 +1,23 @@
+{
+    "footer": [
+        " ",
+        "Developer",
+        "Java Fullstack Developer",
+        "15 Sep 21 To Present",
+        "Thanks"
+    ],
+    "content": [
+        "Three.js-based interactive portfolio website that showcases various 3D elements and text animations. It utilizes 3D geometries, materials, and lighting effects to create an immersive visual experience. The program includes dynamic camera movement, object rotations, and text animations triggered by the camera position. It also incorporates mouse interaction, allowing users to click on the displayed text to open and close a side navigation menu. The program demonstrates the use of Three.js library and its capabilities for creating engaging and interactive web experiences.",
+        "As a passionate and skilled programmer, you have dedicated yourself to the field for over 1.8 years, focusing on the development of software using technologies such as Spring Boot, Angular, and MySQL. Your primary responsibility involves programming, where you actively contribute to the creation and enhancement of various software applications. Through your commitment and expertise, you strive to deliver high-quality code and contribute to the success of your projects.",
+        "<p>HTML</p><div class='container1'><div class='skills html'>90%</div></div><p>CSS</p><div class='container1'><div class='skills css'>90%</div></div><p>JavaScript</p><div class='container1'><div class='skills js'>80%</div></div><p>Java</p><div class='container1'><div class='skills java'>78%</div></div><p>Spring boot</p><div class='container1'><div class='skills spring'>70%</div></div><p>Angular</p><div class='container1'><div class='skills angular'>80%</div></div><p>Mysql</p><div class='container1'><div class='skills mysql'>70%</div></div><p>Mongo Db</p><div class='container1'><div class='skills mongo'>30%</div></div><p>Bootstrap</p><div class='container1'><div class='skills bootstrap'>90%</div></div><p>Aws</p><div class='container1'><div class='skills aws'>20%</div></div><p>Firebase</p><div class='container1'><div class='skills firebase'>70%</div></div>",
+        "pending....",
+        "<a href='https://www.github.com/proxolo1'target='_blank'>github</a>"
+    ],
+    "title": [
+        "H E L L O  : )",
+        "A J A Y K S A N T H O S H",
+        "U N L E A S H I N G  P A S S I O N",
+        "D E V E L O P E R 1 / U S T",
+        "H I R E M E >_<"
+    ]
+}
