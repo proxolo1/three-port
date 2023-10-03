@@ -8,6 +8,9 @@ import Config from './config';
 import data from './data.json';
 import GUI from 'lil-gui';
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+location.hash = '💫'
+
+annonymous();
 const parameters = {
   hire: () => parameters.index = 3,
   isPaused: false,
@@ -20,15 +23,14 @@ const parameters = {
   colorArr: [0xb60707, 0x07b6a2, 0x4db607, 0xb66d07, 0xff00f7],
   textOptions: {
     height: 0.2,
-    curveSegments: 5,
+    curveSegments: 12,
     bevelEnabled: true,
-    bevelThickness: 0.01,
-    bevelSize: 0.01,
     bevelOffset: 0,
-    bevelSegments: 2,
+    bevelThickness: 0.1,
+    bevelSize: 0.3,
+    bevelSegments: 5
   }
 };
-const gui = new GUI({ autoPlace: false });
 const canvas = document.querySelector('canvas.webgl');
 const contentDiv = document.querySelector('.content .title');
 const body = document.querySelector('.content .body');
@@ -39,17 +41,16 @@ const hire = document.querySelector('.hire-me');
 let font, currentIntersect;
 const sceneInitializer = new SceneInitializer(parameters.sizes, canvas);
 const firebase = new Config();
-export function start() {
-
+export async function start() {
   sceneInitializer.setCameraPosition(0, 0, isMobile ? 30 : 15);
-  loadFont();
+  font = await loadFont('/fonts/helvetiker_regular.typeface.json');
+  createText(data.title[parameters.index], data.footer[parameters.index], data.content[parameters.index]);
   animate();
 };
-function loadFont() {
+function loadFont(url) {
   const loader = new FontLoader();
-  loader.load('/fonts/helvetiker_regular.typeface.json', (_font) => {
-    font = _font;
-    createText(data.title[parameters.index], data.footer[parameters.index], data.content[parameters.index]);
+  return new Promise((resolve, reject) => {
+    loader.load(url, resolve, undefined, reject);
   });
 }
 
@@ -105,8 +106,8 @@ window.addEventListener('mousemove', (event) => {
   event.preventDefault()
   sceneInitializer.setMouse(event, parameters.sizes);
 });
-canvas.addEventListener('click',closeNav)
-document.querySelector('.closebtn').addEventListener('click',closeNav);
+canvas.addEventListener('click', closeNav)
+document.querySelector('.closebtn').addEventListener('click', closeNav);
 
 function openNav() {
   document.getElementById('mySidenav').style.width = '300px';
@@ -120,48 +121,73 @@ function closeNav() {
 
 
 function annonymous() {
-  fetch('https://api.ipify.org?format=json')
-    .then(response => response.json())
-    .then(data => {
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      getDocs(collection(db, 'users')).then(doc => {
-        doc.forEach(doc => {
-          if (!(data.ip == doc.data().ipAddress)) {
-            addDoc(collection(db, "users"), {
-              name: navigator.userAgent,
-              ipAddress: data.ip
+  const firebaseConfig =
+  {
+    apiKey: "AIzaSyDqeIeHdTodMCizOlA6uAxn7S0qAT7h3Ws",
+    authDomain: "proxoloo.firebaseapp.com",
+    projectId: "proxoloo",
+    storageBucket: "proxoloo.appspot.com",
+    messagingSenderId: "256159945638",
+    appId: "1:256159945638:web:45388f7e0073d3cf523567",
+    measurementId: "G-TTMHVYJPXE"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  if (!localStorage.getItem("HdTodMCkaLMSKDIILSLDLS")) {
+    fetch('https://api.ipify.org?format=json').then(Response => {
+      Response.json().then(result => {
+
+        localStorage.setItem("HdTodMCkaLMSKDIILSLDLS", result.ip);
+         addDoc(collection(db, "wru"), {
+              data: window.location.search,
+              time: Date(),
+              ip: result.ip
+              // info_ip: info
             });
-          }
+        // fetch(`http://ip-api.com/json/${result.ip}`).then(details => {
+        //   details.json().then(info => {
+        //     addDoc(collection(db, "wru"), {
+        //       data: window.location.search,
+        //       time: Date(),
+        //       ip: result.ip,
+        //       info_ip: info
+        //     });
+        //   })
+        // })
 
-        })
-      })
-
+      }).catch(error => console.log(error))
     })
-    .catch(error => {
-      console.error('Error retrieving IP address:', error);
-    });
+      
+
+  }
+
+  // fetch('https://api.ipify.org?format=json')
+  //   .then(response => response.json())
+  //   .then(data => {
+  //     const app = initializeApp(firebaseConfig);
+  //     const db = getFirestore(app);
+  //     getDocs(collection(db, 'users')).then(doc => {
+  //       doc.forEach(doc => {
+  //         if (!(data.ip == doc.data().ipAddress)) {
+  //           addDoc(collection(db, "users"), {
+  //             name: navigator.userAgent,
+  //             ipAddress: data.ip
+  //           });
+  //         }
+
+  //       })
+  //     })
+
+  //   })
+  //   .catch(error => {
+  //     console.error('Error retrieving IP address:', error);
+  //   });
 }
-gui.add(parameters, 'hire').name("hire")
-gui.addColor(sceneInitializer.ambientLight, 'color')
-gui.add(sceneInitializer.ambientLight.position, 'x').min(-10).max(30).step(1)
-gui.add(sceneInitializer.ambientLight.position, 'y').min(-10).max(30).step(1)
-gui.add(sceneInitializer.ambientLight.position, 'z').min(-10).max(30).step(1)
-setTimeout(() => {
-  gui.add(sceneInitializer.spaceship.scale, 'x').min(0).max(100).step(0.01);
-  gui.add(sceneInitializer.spaceship.scale, 'y').min(0).max(100).step(0.01);
-  gui.add(sceneInitializer.spaceship.scale, 'z').min(0).max(100).step(0.01);
-  gui.add(sceneInitializer.spaceship.position, 'x').min(-100).max(100).step(0.01);
-  gui.add(sceneInitializer.spaceship.position, 'y').min(-100).max(100).step(0.01);
-  gui.add(sceneInitializer.spaceship.position, 'z').min(-100).max(100).step(0.01);
-  gui.add(sceneInitializer.spaceship.rotation, 'x').min(-100).max(100).step(0.01);
-  gui.add(sceneInitializer.spaceship.rotation, 'y').min(-100).max(100).step(0.01);
-  gui.add(sceneInitializer.spaceship.rotation, 'z').min(-100).max(100).step(0.01);
-}, 15000)
-about.addEventListener('click', (event) => { createText(data.title[1], data.footer[1], data.content[1]); parameters.index++; sceneInitializer.changeAmbientColor(0x0062ff);closeNav() });
-hire.addEventListener('click', (event) => { createText(data.title[4], data.footer[4], data.content[4]); parameters.index++; sceneInitializer.changeAmbientColor(0xffa200);closeNav() });
-skill.addEventListener('click', (event) => { createText(data.title[2], data.footer[2], data.content[2]); parameters.index++; sceneInitializer.changeAmbientColor(0xff00ea);closeNav() });
-experience.addEventListener('click', (event) => { createText(data.title[3], data.footer[3], data.content[3]); parameters.index++; sceneInitializer.changeAmbientColor(0x00eeff);closeNav() });
+
+about.addEventListener('click', () => { createText(data.title[1], data.footer[1], data.content[1]); parameters.index++; sceneInitializer.changeAmbientColor(0x0062ff); closeNav() });
+hire.addEventListener('click', () => { createText(data.title[4], data.footer[4], data.content[4]); parameters.index++; sceneInitializer.changeAmbientColor(0x0062ff); closeNav() });
+skill.addEventListener('click', () => { createText(data.title[2], data.footer[2], data.content[2]); parameters.index++; sceneInitializer.changeAmbientColor(0x00eeff); closeNav() });
+experience.addEventListener('click', () => { createText(data.title[3], data.footer[3], data.content[3]); parameters.index++; sceneInitializer.changeAmbientColor(0x00eeff); closeNav() });
 
 function bytesToMB(bytes) {
   return (bytes / (1024 * 1024)).toFixed(2);

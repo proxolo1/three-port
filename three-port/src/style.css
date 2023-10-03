@@ -182,7 +182,7 @@ body {
 
 /* Dark Grey */
 .mongo {
-  width: 30%;
+  width: 70%;
   background-color: #ff0000;
 }
 
@@ -194,7 +194,7 @@ body {
 
 /* Dark Grey */
 .aws {
-  width: 20%;
+  width: 55%;
   background-color: #ff0000;
 }
 
@@ -226,7 +226,7 @@ body {
 }
 
 .status {
-  background: red;
+  background: rgb(255, 255, 255);
   height: 2px;
 }
 
@@ -244,7 +244,6 @@ body {
   /* padding-top: 40px; */
   font-family: "Poppins", sans-serif;
   margin-left: 0;
-  padding-left: 2rem;
 }
 
 
@@ -360,4 +359,8 @@ video {
   video {
     width: 30%;
   }
+}
+
+ul{
+  padding-left: 0 !important;
 }

@@ -18,7 +18,15 @@ export default class SceneInitializer {
         this.controls.enableZoom = false;
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
-        this.standardMaterial = new THREE.MeshBasicMaterial({ wireframe: false, color: 0x14BDA3 });
+        this.standardMaterial =  [
+            new THREE.MeshBasicMaterial({
+               color: 0x000000,
+            flatShading: true
+            }), // front
+            new THREE.MeshBasicMaterial({
+            color: 0xffffff
+            }) // side
+         ]
         this.textGroup = new THREE.Group();
         this.clock = new THREE.Clock();
         THREE.Cache.enabled = true;

@@ -1,0 +1,368 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: 'Gruppo', sans-serif;
+}
+
+html,
+body {
+  overflow: auto;
+}
+
+.h {
+  height: 300vh;
+  z-index: 9999;
+}
+
+.webgl {
+  position: fixed;
+  top: 0;
+  left: 0;
+  outline: none;
+}
+
+.contact {
+  position: absolute;
+  bottom: 2vh;
+  right: 2vh;
+  z-index: 1;
+}
+
+.know {
+  position: absolute;
+  color: #cfcdcd;
+  z-index: 2;
+  top: 2vh;
+  right: 2vh;
+}
+
+
+/* The side navigation menu */
+.sidenav {
+  height: 100%;
+  /* 100% Full-height */
+  width: 0;
+  /* 0 width - change this with JavaScript */
+  position: fixed;
+  /* Stay in place */
+  z-index: 3;
+  /* Stay on top */
+  top: 0;
+  right: 0;
+  background-color: #111;
+  /* Black*/
+  overflow-x: hidden;
+  /* Disable horizontal scroll */
+  padding-top: 60px;
+  /* Place content 60px from the top */
+  transition: 0.5s;
+  /* 0.5 second transition effect to slide in the sidenav */
+}
+
+/* The navigation menu links */
+.sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+/* Position and style the close button (top right corner) */
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+
+/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
+#main {
+  transition: margin-left .5s;
+  padding: 20px;
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+  .sidenav {
+    padding-top: 15px;
+  }
+
+  .sidenav a {
+    font-size: 18px;
+  }
+}
+
+.content {
+  margin-left: 2vh;
+  color: white;
+}
+
+.content .title {
+  padding: 2px;
+}
+
+.content .body {
+  margin: 4vh;
+  line-height: 3vh;
+}
+
+.know ul {
+  margin-left: 3vh;
+}
+
+.container1 {
+  width: 100%;
+  /* Full width */
+  background-color: #ddd;
+  /* Grey background */
+  margin-bottom: 4vh;
+}
+
+.skills {
+  text-align: right;
+  /* Right-align text */
+  padding-top: 1px;
+  /* Add top padding */
+  padding-bottom: 1px;
+  /* Add bottom padding */
+  color: white;
+  /* White text color */
+  height: 1px;
+
+}
+
+.html {
+  width: 90%;
+  background-color: #ff0000;
+}
+
+/* Green */
+.css {
+  width: 90%;
+  background-color: #ff0000;
+}
+
+/* Blue */
+.js {
+  width: 80%;
+  background-color: #ff0000;
+}
+
+/* Red */
+.java {
+  width: 78%;
+  background-color: #ff0000;
+}
+
+/* Dark Grey */
+.spring {
+  width: 70%;
+  background-color: #ff0000;
+}
+
+/* Dark Grey */
+.angular {
+  width: 80%;
+  background-color: #ff0000;
+}
+
+/* Dark Grey */
+.mysql {
+  width: 70%;
+  background-color: #ff0000;
+}
+
+/* Dark Grey */
+.mongo {
+  width: 70%;
+  background-color: #ff0000;
+}
+
+/* Dark Grey */
+.bootstrap {
+  width: 90%;
+  background-color: #ff0000;
+}
+
+/* Dark Grey */
+.aws {
+  width: 55%;
+  background-color: #ff0000;
+}
+
+/* Dark Grey */
+.firebase {
+  width: 70%;
+  background-color: #ff0000;
+}
+
+/* Dark Grey */
+
+
+/* #gui { position: absolute; top: 2px; left: 2px } */
+
+.progress-bar {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  z-index: 20;
+}
+
+.bar {
+  position: absolute;
+  /* top: 50%; */
+  width: 100%;
+  height: 2px;
+  top: 0vh;
+}
+
+.status {
+  background: rgb(255, 255, 255);
+  height: 2px;
+}
+
+.lil-gui.autoPlace {
+  left: 0 !important;
+}
+
+
+.wrapper {
+  display: inline-flex;
+  list-style: none;
+  /* height: 120px; */
+  /* left: 50%; */
+  /* width: 100%; */
+  /* padding-top: 40px; */
+  font-family: "Poppins", sans-serif;
+  margin-left: 0;
+}
+
+
+.wrapper .icon {
+  position: relative;
+  border-bottom: 1px solid #ffffff87;
+  color: white;
+  background: #1e1e1e;
+  margin: 10px;
+  width: 4em;
+  height: 2em;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.wrapper .tooltip {
+  position: absolute;
+  top: 0;
+  font-size: 14px;
+  background: #fff;
+  color: #fff;
+  padding: 5px 8px;
+  border-radius: 5px;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.wrapper .tooltip::before {
+  position: absolute;
+  content: "";
+  height: 8px;
+  width: 8px;
+  background: #fff;
+  bottom: -3px;
+  left: 50%;
+  transform: translate(-50%) rotate(45deg);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.wrapper .icon:hover .tooltip {
+  top: -45px;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.wrapper .icon:hover span,
+.wrapper .icon:hover .tooltip {
+  text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.1);
+}
+
+.wrapper .about:hover,
+.wrapper .about:hover .tooltip,
+.wrapper .about:hover .tooltip::before {
+  background: #0062ff;
+  color: #fff;
+}
+
+.wrapper .skill:hover,
+.wrapper .skill:hover .tooltip,
+.wrapper .skill:hover .tooltip::before {
+  background: #0062ff;
+  color: #fff;
+}
+
+.wrapper .experience:hover,
+.wrapper .experience:hover .tooltip,
+.wrapper .experience:hover .tooltip::before {
+  background: #0062ff;
+  color: #fff;
+}
+
+.wrapper .hire-me:hover,
+.wrapper .hire-me:hover .tooltip,
+.wrapper .hire-me:hover .tooltip::before {
+  background: #0062ff;
+  color: #fff;
+}
+
+.data {
+  color: #E4405F;
+  text-align: end;
+  margin-right: 3vh;
+  position: relative;
+}
+
+#video-container {
+  /* width: 1%; */
+  position: absolute;
+}
+
+video {
+  width: 90%;
+  margin: 12vh 2vh;
+}
+
+.demo {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+@media (min-width: 1200px) {
+
+  video {
+    width: 30%;
+  }
+}
+
+ul{
+  padding-left: 0 !important;
+}
+
+/*# sourceMappingURL=main.css.map*/
